@@ -6,6 +6,11 @@
 \usetikzlibrary{automata,positioning,arrows.meta}
 \usepackage[colorlinks=true,linkcolor=blue!50!black,citecolor=blue!50!black,urlcolor=blue!50!black]{hyperref}
 
+\usepackage[all]{xy}
+\newcommand{\word}{1101000000100}
+\newcommand{\okina}{\textquoteleft}
+
+
 \newtheorem{theorem}{Theorem}[section]
 \newtheorem{lemma}[theorem]{Lemma}
 \newtheorem{proposition}[theorem]{Proposition}
@@ -22,10 +27,9 @@
 \newcommand{\Z}{\mathbb{Z}}
 \DeclareMathOperator{\lcm}{lcm}
 
-\title{Exact beats unique infinitely often:\\
-a separation of nondeterministic automatic complexities}
-\author{}
-\date{August 24, 2026}
+\title{Exact versus unique nondeterministic automatic complexity}
+% \author{Bj{\o}rn Kjos-Hanssen \\ Travis Rivera Petit}
+% \date{August 24, 2026}
 
 \begin{document}
 \maketitle
@@ -36,8 +40,9 @@ $w$ (the least number of states of an NFA accepting $w$ by a \emph{unique}
 accepting path among inputs of length $|w|$), and let $\ANe(w)$ denote the
 exact nondeterministic automatic complexity (the least number of states of an
 NFA accepting $w$ and \emph{no other word} of length $|w|$, multiple accepting
-paths allowed), as introduced by Chen, Kjos-Hanssen, Koswara, Richter and
-Stephan (FSTTCS 2025), who asked whether the two measures ever differ. The word
+paths allowed), as studied by Chen, Kjos-Hanssen, Koswara, Richter and
+Stephan (FSTTCS 2025), who asked whether the two measures ever differ.
+The word
 $w_0=0123333333340156$ separates them: $\ANe(w_0)\le 8<9=\AN(w_0)$. We prove that
 the separation occurs infinitely often, and in the strongest sense: for every
 $k\equiv 0 \pmod 3$, $k\ge 3$, the word
@@ -76,7 +81,7 @@ of an NFA uniquely accepting $w$.
 \end{definition}
 
 Since unique acceptance implies exact acceptance, $\ANe(w)\le\AN(w)$ for every
-$w$. Whether the inequality can be strict was raised in \cite{CKKRS} as the
+$w$. Whether the inequality can be strict has been open since 2013 (Hyde~\cite{H}), and was posed in \cite{CKKRS} as the
 ``cardinal open question'' about the impact of exactness. The word
 \[
 w_0 \;=\; 0\,1\,2\,3^8\,4\,0\,1\,5\,6 \qquad (|w_0|=16)
@@ -108,6 +113,8 @@ over the alphabet $\Sigma_k=\{a_1,\dots,a_k,b,c,d,e\}$ of $k+4$ letters. Then
 There are infinitely many words $w$, of unbounded length and pairwise distinct
 up to renaming of letters, with $\ANe(w)<\AN(w)$.
 \end{corollary}
+
+The shortest such word appears at length 13 (Figure \ref{fig:M}).
 
 \begin{corollary}\label{cor:paths}
 For every such $k$, every $(k+5)$-state NFA exactly accepting $z_k$ has at
@@ -150,7 +157,8 @@ only the smallest cases $k\le15$ are delegated to a computer.
 The base case $k=3$ and the instances $k=6,9,12,15,18$ of the lower bound
 have been verified by an exhaustive, pruned search over all
 uniquely-accepting walks (Section~\ref{sec:verification}); the proof for
-$k\ge18$ is self-contained, so the instance $k=18$ is confirmed twice. All constructions of the paper, and the individual surgeries
+$k\ge18$ is self-contained, so the instance $k=18$ is confirmed twice.
+All constructions of the paper, and the individual surgeries
 of the lower-bound proof, have additionally been machine-checked.
 
 \begin{remark}
@@ -166,6 +174,24 @@ nonempty for infinitely many parameters. Our proof gives explicit witnesses
 rather than pumping abstractly, since regularity alone does not decide
 infinitude at a fixed level.
 \end{remark}
+
+
+\begin{figure}
+\[
+	\xymatrix{
+	&			  *+[Fo]{q_5}\ar@/_/[d]_0\ar@(ul,ur)^0\\
+	&			  *+[Fo]{q_4}\ar[dr]^0\ar@/_/[u]_0\\
+	*+[Fo]{q_3} \ar[dr]_0\ar[ur]^1 & *+[Fo]{q_2}\ar[l]_0 & *+[Fo]{q_1}\ar[l]_1\\
+	 \text{start}\ar[r]& *+[Foo]{q_0}\ar[ur]_1 & \\
+	}
+\]
+\caption{The shortest word separating $\ANe$ and $\AN$ has length $n=13$. The NFA $M$ has initial and final state $q_0$. Its only accepted
+word of length $13$ is $w=\word$, accepted along exactly three paths, so
+that $\ANe(w)\le 6$. It turns out that $\AN(w)=7$.
+}
+\label{fig:M}
+\end{figure}
+
 
 \section{Preliminaries: unique acceptance and walks}\label{sec:prelim}
 
@@ -183,7 +209,11 @@ induced \emph{walk graph}
 \Delta_W=\{\,e_t:=(c_t,z_t,c_{t+1})\;:\;0\le t\le n-1\,\}
 \]
 (a set of transitions; repetitions merge), a \emph{uniquely accepting walk}
-for $z$ if the NFA $(\{c_0,\dots,c_n\},\Sigma,\Delta_W,c_0,\{c_n\})$ has
+for $z$ if the NFA
+\[
+	(\{c_0,\dots,c_n\},\Sigma,\Delta_W,c_0,\{c_n\})
+\]
+has
 exactly one path of length $n$ from $c_0$ to $c_n$. (That path is then
 necessarily $e_0e_1\cdots e_{n-1}$, which spells $z$; so this NFA uniquely
 accepts $z$.)
@@ -233,28 +263,19 @@ $k$ prefix times, $k+6$ run times, and $k+2$ tail times.
 
 \begin{figure}[t]
 \centering
-\begin{tikzpicture}[->,>=Stealth,node distance=1.55cm,every state/.style={minimum size=6.5mm,inner sep=1pt},scale=0.92,transform shape]
-\node[state,initial,initial text={}] (s0) {$s_0$};
-\node[state,right=of s0] (s1) {$s_1$};
-\node[right=0.7cm of s1] (dots) {$\cdots$};
-\node[state,right=0.7cm of dots] (sk1) {$s_{k-1}$};
-\node[state,right=of sk1] (A) {$A$};
-\node[state,right=of A] (X) {$X$};
-\node[state,above right=0.6cm and 1.2cm of X] (B) {$B$};
-\node[state,below=1.4cm of sk1] (t1) {$t_1$};
-\node[state,accepting,right=of t1] (t2) {$t_2$};
-\path (s0) edge node[above] {$a_1$} (s1)
-      (s1) edge node[above] {$a_2$} (dots)
-      (dots) edge node[above] {$a_{k-1}$} (sk1)
-      (sk1) edge node[above] {$a_k$} (A)
-      (A) edge node[above] {$b$} (X)
-      (X) edge[bend left=15] node[above left] {$b$} (B)
-      (B) edge[bend left=25] node[above] {$b$} (A)
-      (B) edge[loop right] node[right] {$b$} (B)
-      (sk1) edge node[left] {$d$} (t1)
-      (t1) edge node[above] {$e$} (t2);
-\draw[->] (X) .. controls +(1.1,-1.7) and +(0.4,-1.9) .. node[below,pos=0.35] {$c$} (s0);
-\end{tikzpicture}
+\[
+\xymatrix{
+& & *+[F]{B}\ar@(ul,ur)^b\ar[drr]^b & & & & \\
+&*+[F]{X}\ar[ur]^b\ar[d]_c & & &*+[F]{A}\ar[lll]^b & & \\
+\text{start}\ar[r]&	*+[F]{s_0} \ar[r]^{a_1} & *+[F]{s_1} \ar[r]^{a_2} & \cdots \ar[r]^{a_{k-1}} & *+[F]{s_{k-1}}\ar[u]_{a_k}\ar[r]_d & *+[F]{t_1}\ar[r]_e & *+[F=]{t_2}\\
+	}
+% \xymatrix@C=1.2em@R=2.0em{
+% 	s_0 \ar[r]^{a_1} & s_1 \ar[r]^{a_2} & \cdots \ar[r]^{a_{k-1}} & s_{k-1} \ar[r]^{a_k} \ar[d]_{d} &
+% A \ar[r]^{b} & X \ar[ur]^{b} \ar@/^3pc/[llllll]_{c} & B \ar@/^1.5pc/[ll]^{b} \ar@(ur,dr)^{b}
+% \\
+% &&& t_1 \ar[r]^{e} & t_2
+% }
+\]
 \caption{The exact acceptor $M_k$ ($k+5$ states). For $k=3$ this is an
 $8$-state NFA exactly accepting $w_0=0123^8\,40156$, with three accepting
 paths.}\label{fig:M3}
@@ -317,7 +338,9 @@ s_0\to\cdots\to s_{k-1}\xrightarrow{d}t_1\xrightarrow{e}t_2
 \]
 for some $r\ge0$ and $t_1',\dots,t_r'\in T$ (we write $t_i$ for the run
 lengths), spelling
-$\big(\prod_{i=1}^{r} a_1\cdots a_k\,b^{t_i}\,c\big)\,a_1\cdots a_{k-1}\,d\,e$,
+\[
+	\left(\prod_{i=1}^{r} a_1\cdots a_k\,b^{t_i}\,c\right)\,a_1\cdots a_{k-1}\,d\,e,
+\]
 of length $\sum_{i=1}^r\big((k+1)+t_i\big)+(k+1)$. Setting this equal to
 $n=3k+7$ gives
 \[
@@ -1854,20 +1877,29 @@ mechanism within one word (several runs with several folds over disjoint
 letters) is a natural approach to larger gaps, but the interaction of the
 block equations across runs is delicate, and we leave it open.
 
-\paragraph{Acknowledgement.} The question answered here was raised by
-Bj\o rn Kjos-Hanssen, together with the base example $w_0$ and the
-observation that all of its minimal exact acceptors have multiple
-accepting paths.
+\paragraph{Acknowledgments.}
+% This work was supported by a grant from the Simons Foundation (\#4508914 to Bj\o rn Kjos-Hanssen).
+This work was completed with assistance from the following AI agents:
+\begin{itemize}
+	\item ChatGPT Sol 5.6 (OpenAI): finding the first example of a word $w$ with $A_{Ne}(w)<A_N(w)$.
+	\item Claube Fable 5 (Anthropic): proving that there are such words $w$ of unbounded length.
+\end{itemize}
+Kjos-Hanssen has used Aristotle (Harmonic) to formalize the results of our paper in the proof assistant Lean, see \cite{pathvsword}.
+All results except for the machine verified facts in Section~\ref{sec:verification} were formalized.
+
+% Moreover, calculations were performed at sciCORE (http://scicore.unibas.ch/) scientific computing center at University of Basel.
 
 \begin{thebibliography}{9}
 \bibitem{CKKRS} J.~Chen, B.~Kjos-Hanssen, I.~Koswara, L.~Richter,
 F.~Stephan, \emph{Languages of words of low automatic complexity are hard
 to compute}, Proc.\ FSTTCS 2025, LIPIcs vol.\ 360, art.\ 24.
+\bibitem{H} K.~Hyde, \emph{Nondeterministic finite state complexity}, Master's project, University of Hawai\okina i at M\=anoa, 2013.
 \bibitem{HK} K.~Hyde, B.~Kjos-Hanssen, \emph{Nondeterministic automatic
 complexity of overlap-free and almost square-free words}, Electron.\ J.
 Combin.\ 22 (2015), no.\ 3, P3.22.
 \bibitem{KH} B.~Kjos-Hanssen, \emph{Automatic complexity: a computable
 measure of irregularity}, De Gruyter, 2024.
+\bibitem{pathvsword} B.~Kjos-Hanssen, \emph{pathvsword}, Lean formalization repository at \url{https://github.com/bjoernkjoshanssen/pathvsword}.
 \bibitem{SW} J.~Shallit, M.-W.~Wang, \emph{Automatic complexity of
 strings}, J.~Autom.\ Lang.\ Comb.\ 6 (2001), 537--554.
 \end{thebibliography}
