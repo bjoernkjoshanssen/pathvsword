@@ -1,4 +1,4 @@
-import Mathlib
+import RequestProject.ProofImports
 
 /-!
 # Definitions: words, NFAs, exact and unique nondeterministic automatic complexity
